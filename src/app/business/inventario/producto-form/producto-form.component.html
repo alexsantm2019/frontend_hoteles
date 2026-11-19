@@ -1,0 +1,64 @@
+<h2 mat-dialog-title>{{ esEdicion ? "Editar" : "Nuevo" }} Producto</h2>
+<mat-dialog-content>
+  <form
+    [formGroup]="form"
+    class="d-flex flex-col gap-3 pt-2"
+    style="margin-top: 20px"
+  >
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Nombre del Producto</mat-label>
+      <input matInput formControlName="nombre" placeholder="Ej. Agua Mineral" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Categoría (Opcional)</mat-label>
+      <input matInput formControlName="categoria" placeholder="Ej. Bebidas" />
+    </mat-form-field>
+
+    <div class="row">
+      <div class="col-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Precio Compra ($)</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="precio_compra"
+            appOnlyNumbers
+          />
+        </mat-form-field>
+      </div>
+      <div class="col-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Precio Venta ($)</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="precio_venta"
+            appOnlyNumbers
+          />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Stock Mínimo (Alerta)</mat-label>
+      <input
+        matInput
+        type="number"
+        formControlName="stock_minimo"
+        appOnlyNumbers
+      />
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid || guardando"
+    (click)="guardar()"
+  >
+    Guardar
+  </button>
+</mat-dialog-actions>

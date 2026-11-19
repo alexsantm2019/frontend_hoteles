@@ -1,0 +1,151 @@
+<div class="p-24">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="f-s-24 f-w-700 m-0">Temporadas y Promociones</h2>
+      <div
+        class="alert alert-info d-flex align-items-center mt-2 mb-0 py-2"
+        role="alert"
+      >
+        <i-tabler name="info-circle" class="icon-18 me-2"></i-tabler>
+        <span class="f-s-13">
+          Puedes tener varias promociones activas al mismo tiempo. Si dos se
+          cruzan en fechas, el sistema aplicará la más específica (la que tenga
+          habitaciones asignadas) o, en su defecto, la de menor duración.
+        </span>
+      </div>
+    </div>
+    <button mat-flat-button color="primary" (click)="abrirFormulario()">
+      <i-tabler name="plus" class="icon-18 me-2"></i-tabler>
+      Nueva Temporada
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="text-center p-5"><mat-spinner diameter="40"></mat-spinner></div>
+  } @else {
+    <mat-card>
+      <mat-card-content class="p-0">
+        <table mat-table [dataSource]="temporadas()" class="w-100">
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let t">
+              @if (t.activa) {
+                <span class="badge bg-light-success text-success">ACTIVA</span>
+              } @else {
+                <span class="badge bg-light-secondary text-secondary"
+                  >INACTIVA</span
+                >
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Promoción</th>
+            <td mat-cell *matCellDef="let t">
+              <strong>{{ t.nombre }}</strong>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="fechas">
+            <th mat-header-cell *matHeaderCellDef>Fechas</th>
+            <td mat-cell *matCellDef="let t">
+              {{ t.fecha_inicio | date: "dd/MM/yyyy" }}
+              <br />
+              <span class="text-muted f-s-12"
+                >hasta {{ t.fecha_fin | date: "dd/MM/yyyy" }}</span
+              >
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="alcance">
+            <th mat-header-cell *matHeaderCellDef>Alcance</th>
+            <td mat-cell *matCellDef="let t">
+              @if (t.habitaciones && t.habitaciones.length > 0) {
+                <span class="badge bg-light-primary text-primary">
+                  <i-tabler name="door" class="icon-14 me-1"></i-tabler>
+                  <!-- Mostramos la lista generada por el backend -->
+                  {{ t.habitaciones_detalle }}
+                </span>
+              } @else {
+                <span class="badge bg-light-info text-info">
+                  <i-tabler name="building" class="icon-14 me-1"></i-tabler>
+                  Todo el Hotel
+                </span>
+              }
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="iva_porcentaje">
+            <th mat-header-cell *matHeaderCellDef>IVA aplicado</th>
+            <td mat-cell *matCellDef="let t">
+              <span class="f-w-700">${{ t.iva_porcentaje }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="precio">
+            <th mat-header-cell *matHeaderCellDef>Precio Especial</th>
+            <td mat-cell *matCellDef="let t">
+              <span class="f-w-700 text-success">${{ t.precio_especial }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="text-end">Acciones</th>
+            <td mat-cell *matCellDef="let t" class="text-end">
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="abrirFormulario(t)"
+                matTooltip="Editar Promoción"
+              >
+                <i-tabler name="edit" class="icon-18"></i-tabler>
+              </button>
+              <button
+                mat-icon-button
+                color="warn"
+                (click)="eliminarTemporada(t)"
+                matTooltip="Eliminar Promoción"
+              >
+                <i-tabler name="trash" class="icon-18"></i-tabler>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr
+            mat-header-row
+            *matHeaderRowDef="[
+              'estado',
+              'nombre',
+              'fechas',
+              'alcance',
+              'iva_porcentaje',
+              'precio',
+              'acciones',
+            ]"
+          ></tr>
+          <tr
+            mat-row
+            *matRowDef="
+              let row;
+              columns: [
+                'estado',
+                'nombre',
+                'fechas',
+                'alcance',
+                'iva_porcentaje',
+                'precio',
+                'acciones',
+              ]
+            "
+          ></tr>
+        </table>
+
+        @if (temporadas().length === 0) {
+          <div class="p-4 text-center text-muted">
+            No hay promociones configuradas.
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

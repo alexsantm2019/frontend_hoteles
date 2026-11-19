@@ -1,0 +1,139 @@
+<div class="p-24">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="f-s-24 f-w-700 m-0">Equipo de Trabajo</h2>
+      <p class="text-muted f-s-14 m-0">
+        Gestiona a tu personal y asigna sus roles y hoteles.
+      </p>
+    </div>
+    <button mat-flat-button color="primary" (click)="abrirFormulario()">
+      <i-tabler name="plus" class="icon-18 me-2"></i-tabler> Nuevo Usuario
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="text-center p-5"><mat-spinner diameter="40"></mat-spinner></div>
+  } @else {
+    <mat-card>
+      <mat-card-content class="p-0">
+        <table mat-table [dataSource]="usuarios()" class="w-100">
+          <!-- Columna: Nombre -->
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+            <td mat-cell *matCellDef="let u">
+              <strong>{{ u.first_name }} {{ u.last_name }}</strong>
+              <div class="text-muted f-s-12">@{{ u.username }}</div>
+            </td>
+          </ng-container>
+
+          <!-- Columna: Contacto -->
+          <ng-container matColumnDef="contacto">
+            <th mat-header-cell *matHeaderCellDef>Contacto</th>
+            <td mat-cell *matCellDef="let u">
+              {{ u.email }}
+            </td>
+          </ng-container>
+
+          <!-- Columna: Rol -->
+          <ng-container matColumnDef="rol">
+            <th mat-header-cell *matHeaderCellDef>Rol</th>
+            <td mat-cell *matCellDef="let u">
+              <span class="badge bg-light-primary text-primary">{{
+                u.rol_nombre
+              }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Columna: Hoteles -->
+          <ng-container matColumnDef="hoteles">
+            <th mat-header-cell *matHeaderCellDef>Hoteles</th>
+            <td mat-cell *matCellDef="let u">
+              {{ u.hoteles_nombres.join(", ") }}
+            </td>
+          </ng-container>
+
+          <!-- Columna: Estado -->
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let u">
+              <span
+                class="badge"
+                [ngClass]="
+                  u.is_active
+                    ? 'bg-light-success text-success'
+                    : 'bg-light-error text-error'
+                "
+              >
+                {{ u.is_active ? "ACTIVO" : "INACTIVO" }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Columna: Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="text-end">Acciones</th>
+            <td mat-cell *matCellDef="let u" class="text-end">
+              <!-- Botón Editar -->
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="abrirFormulario(u)"
+                matTooltip="Editar Usuario"
+              >
+                <i-tabler name="edit" class="icon-18"></i-tabler>
+              </button>
+
+              <!-- Botón Activar/Desactivar -->
+              <button
+                mat-icon-button
+                [color]="u.is_active ? 'warn' : 'accent'"
+                (click)="toggleActivo(u)"
+                [matTooltip]="
+                  u.is_active ? 'Desactivar Acceso' : 'Activar Acceso'
+                "
+              >
+                <i-tabler
+                  [name]="u.is_active ? 'user-off' : 'user-check'"
+                  class="icon-18"
+                ></i-tabler>
+              </button>
+            </td>
+          </ng-container>
+
+          <!-- Definición de Columnas -->
+          <tr
+            mat-header-row
+            *matHeaderRowDef="[
+              'nombre',
+              'contacto',
+              'rol',
+              'hoteles',
+              'estado',
+              'acciones',
+            ]"
+          ></tr>
+          <tr
+            mat-row
+            *matRowDef="
+              let row;
+              columns: [
+                'nombre',
+                'contacto',
+                'rol',
+                'hoteles',
+                'estado',
+                'acciones',
+              ]
+            "
+          ></tr>
+        </table>
+
+        @if (usuarios().length === 0) {
+          <div class="p-4 text-center text-muted">
+            No hay usuarios registrados en tu equipo.
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

@@ -1,0 +1,38 @@
+<h2 mat-dialog-title>{{ esEdicion ? "Editar" : "Nuevo" }} Hotel</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="d-flex flex-col gap-3 pt-2">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Nombre del Hotel</mat-label>
+      <input matInput formControlName="nombre" placeholder="Ej. Hotel Lumini" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Slug (para URL)</mat-label>
+      <input matInput formControlName="slug" placeholder="Ej. lumini" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Dirección</mat-label>
+      <input
+        matInput
+        formControlName="direccion"
+        placeholder="Ej. Av. Amazonas y Naciones Unidas"
+      />
+    </mat-form-field>
+
+    <mat-checkbox formControlName="activo" color="primary">
+      Hotel Activo
+    </mat-checkbox>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid || guardando"
+    (click)="guardar()"
+  >
+    {{ guardando ? "Guardando..." : "Guardar" }}
+  </button>
+</mat-dialog-actions>

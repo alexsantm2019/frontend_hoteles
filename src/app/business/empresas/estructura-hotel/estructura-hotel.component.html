@@ -1,0 +1,141 @@
+<div class="p-24">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="f-s-24 f-w-700 m-0">Estructura del Hotel</h2>
+    <button mat-flat-button color="primary" (click)="abrirFormulario()">
+      <i-tabler name="plus" class="icon-18 me-2"></i-tabler>
+      Agregar Edificio
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="text-center p-5"><mat-spinner diameter="40"></mat-spinner></div>
+  } @else {
+    <div class="row">
+      <!-- Bucle de Edificios -->
+      @for (edificio of edificios(); track edificio.id) {
+        <div class="col-lg-6 mb-4">
+          <mat-card class="h-100">
+            <mat-card-header
+              class="bg-light-primary rounded-top p-3 d-flex justify-content-between align-items-center"
+            >
+              <mat-card-title class="f-s-18 f-w-600 m-0">
+                <i-tabler name="building" class="icon-20 me-2"></i-tabler>
+                {{ edificio.nombre }}
+              </mat-card-title>
+
+              <div>
+                <button
+                  mat-icon-button
+                  color="accent"
+                  (click)="abrirFormularioPiso(edificio.id)"
+                  matTooltip="Agregar Piso"
+                >
+                  <i-tabler name="plus" class="icon-20"></i-tabler>
+                </button>
+                <button
+                  mat-icon-button
+                  color="primary"
+                  (click)="abrirFormulario(edificio)"
+                  matTooltip="Editar Edificio"
+                >
+                  <i-tabler name="edit" class="icon-20"></i-tabler>
+                </button>
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="eliminarEdificio(edificio)"
+                  matTooltip="Eliminar Edificio"
+                >
+                  <i-tabler name="trash" class="icon-20"></i-tabler>
+                </button>
+              </div>
+            </mat-card-header>
+
+            <mat-card-content class="p-0">
+              <mat-accordion multi>
+                <!-- Bucle de Pisos (anidado dentro de Edificio) -->
+                @for (piso of edificio.pisos; track piso.id) {
+                  <mat-expansion-panel>
+                    <mat-expansion-panel-header>
+                      <mat-panel-title class="f-w-600">
+                        Piso {{ piso.numero }}
+                      </mat-panel-title>
+                      <mat-panel-description
+                        class="d-flex justify-content-between align-items-center"
+                      >
+                        <span>{{ piso.habitaciones.length }} Habitaciones</span>
+                        <!-- Aquí usamos 'piso' correctamente -->
+                        <button
+                          mat-icon-button
+                          color="primary"
+                          (click)="
+                            $event.stopPropagation();
+                            abrirFormularioHabitacion(piso.id)
+                          "
+                          matTooltip="Agregar Habitación"
+                        >
+                          <i-tabler name="plus" class="icon-18"></i-tabler>
+                        </button>
+                      </mat-panel-description>
+                    </mat-expansion-panel-header>
+
+                    <!-- Bucle de Habitaciones (anidado dentro de Piso) -->
+                    <mat-list>
+                      @for (hab of piso.habitaciones; track hab.id) {
+                        <mat-list-item>
+                          <i-tabler
+                            matListItemIcon
+                            name="door"
+                            class="icon-20"
+                          ></i-tabler>
+                          <span matListItemTitle
+                            >Habitación {{ hab.numero }} ({{ hab.tipo }})</span
+                          >
+                          <span matListItemLine
+                            >Capacidad:
+                            {{ hab.capacidad_maxima }} personas</span
+                          >
+
+                          <div matListItemMeta>
+                            <button
+                              mat-icon-button
+                              color="primary"
+                              (click)="abrirFormularioHabitacion(piso.id, hab)"
+                            >
+                              <i-tabler name="edit" class="icon-18"></i-tabler>
+                            </button>
+                            <button
+                              mat-icon-button
+                              color="warn"
+                              (click)="eliminarHabitacion(hab)"
+                            >
+                              <i-tabler name="trash" class="icon-18"></i-tabler>
+                            </button>
+                          </div>
+                        </mat-list-item>
+                      } @empty {
+                        <div class="p-3 text-muted">
+                          No hay habitaciones registradas en este piso.
+                        </div>
+                      }
+                    </mat-list>
+                  </mat-expansion-panel>
+                } @empty {
+                  <div class="p-4 text-muted">
+                    No hay pisos registrados en este edificio.
+                  </div>
+                }
+              </mat-accordion>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      } @empty {
+        <div class="col-12 text-center p-5">
+          <h4 class="text-muted">
+            No hay edificios registrados en este hotel.
+          </h4>
+        </div>
+      }
+    </div>
+  }
+</div>

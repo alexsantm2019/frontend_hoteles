@@ -1,0 +1,103 @@
+<h2 mat-dialog-title>
+  {{ esEdicion ? "Editar" : "Nueva" }} Temporada / Promoción
+</h2>
+<mat-dialog-content>
+  <form
+    [formGroup]="form"
+    class="d-flex flex-col gap-3 pt-2"
+    style="margin-top: 20px"
+  >
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Nombre de la Promoción</mat-label>
+      <input matInput formControlName="nombre" placeholder="Ej. Navidad 2026" />
+    </mat-form-field>
+
+    <div class="row">
+      <div class="col-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Fecha Inicio</mat-label>
+          <input
+            matInput
+            [matDatepicker]="pickerInicio"
+            formControlName="fecha_inicio"
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="pickerInicio"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #pickerInicio></mat-datepicker>
+        </mat-form-field>
+      </div>
+      <div class="col-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Fecha Fin</mat-label>
+          <input
+            matInput
+            [matDatepicker]="pickerFin"
+            formControlName="fecha_fin"
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="pickerFin"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #pickerFin></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </div>
+    <!-- NUEVO MENSAJE DE ERROR -->
+    @if (form.hasError("fechaInvalida") && form.get("fecha_fin")?.touched) {
+      <div class="text-error f-s-12 mb-2" style="margin-top: -15px">
+        La fecha de fin no puede ser anterior a la fecha de inicio.
+      </div>
+    }
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Habitaciones Aplicables</mat-label>
+        <mat-select formControlName="habitaciones" multiple>
+          <!-- Si no selecciona ninguna, aplica a todo el hotel (esto lo controlamos lógicamente) -->
+          @for (hab of habitaciones; track hab.id) {
+            <mat-option [value]="hab.id"
+              >Hab. {{ hab.numero }} ({{ hab.tipo }})</mat-option
+            >
+          }
+        </mat-select>
+        <mat-hint
+          >Si no seleccionas ninguna, se aplicará a todo el hotel.</mat-hint
+        >
+      </mat-form-field>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Precio Especial por Noche ($)</mat-label>
+      <input matInput type="number" formControlName="precio_especial" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100 mt-2">
+      <mat-label>IVA Especial (%)</mat-label>
+      <mat-select formControlName="iva_porcentaje">
+        <mat-option [value]="null">Usar IVA Global (Por defecto)</mat-option>
+        @for (iva of ivas; track iva.id) {
+          <mat-option [value]="iva.valor"
+            >{{ iva.clave }} ({{ iva.valor }}%)</mat-option
+          >
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-checkbox formControlName="activa" color="primary">
+      Activar esta promoción
+    </mat-checkbox>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid || guardando"
+    (click)="guardar()"
+  >
+    Guardar
+  </button>
+</mat-dialog-actions>

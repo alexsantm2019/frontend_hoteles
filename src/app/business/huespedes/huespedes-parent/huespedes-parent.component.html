@@ -1,0 +1,76 @@
+<div class="p-24">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="f-s-24 f-w-700 m-0">Directorio de Huéspedes</h2>
+    <button mat-flat-button color="primary" (click)="abrirFormulario()">
+      <i-tabler name="plus" class="icon-18 me-2"></i-tabler>
+      Nuevo Huésped
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="text-center p-5"><mat-spinner diameter="40"></mat-spinner></div>
+  } @else {
+    <mat-card>
+      <mat-card-content class="p-0">
+        <table mat-table [dataSource]="huespedes()" class="w-100">
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Huésped</th>
+            <td mat-cell *matCellDef="let h">
+              <strong>{{ h.nombres }} {{ h.apellidos }}</strong>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="documento">
+            <th mat-header-cell *matHeaderCellDef>Documento</th>
+            <td mat-cell *matCellDef="let h">
+              {{ h.tipo_documento | uppercase }}: {{ h.documento }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="contacto">
+            <th mat-header-cell *matHeaderCellDef>Contacto</th>
+            <td mat-cell *matCellDef="let h">
+              <div>{{ h.email || "Sin email" }}</div>
+              <div class="text-muted f-s-12">
+                {{ h.telefono || "Sin teléfono" }}
+              </div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="text-end">Acciones</th>
+            <td mat-cell *matCellDef="let h" class="text-end">
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="abrirFormulario(h)"
+              >
+                <i-tabler name="edit" class="icon-18"></i-tabler>
+              </button>
+              <button mat-icon-button color="warn" (click)="eliminarHuesped(h)">
+                <i-tabler name="trash" class="icon-18"></i-tabler>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr
+            mat-header-row
+            *matHeaderRowDef="['nombre', 'documento', 'contacto', 'acciones']"
+          ></tr>
+          <tr
+            mat-row
+            *matRowDef="
+              let row;
+              columns: ['nombre', 'documento', 'contacto', 'acciones']
+            "
+          ></tr>
+        </table>
+        @if (huespedes().length === 0) {
+          <div class="p-4 text-center text-muted">
+            No hay huéspedes registrados.
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

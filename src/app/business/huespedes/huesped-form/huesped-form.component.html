@@ -1,0 +1,85 @@
+<h2 mat-dialog-title>{{ esEdicion ? "Editar" : "Nuevo" }} Huésped</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="d-flex flex-col gap-3 pt-2">
+    <div class="row">
+      <div class="col-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Nombres</mat-label>
+          <input matInput formControlName="nombres" appOnlyLetters />
+        </mat-form-field>
+      </div>
+      <div class="col-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Apellidos</mat-label>
+          <input matInput formControlName="apellidos" appOnlyLetters />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-4">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Tipo Doc.</mat-label>
+          <mat-select formControlName="tipo_documento">
+            <mat-option value="cedula">Cédula</mat-option>
+            <mat-option value="pasaporte">Pasaporte</mat-option>
+            <mat-option value="ruc">RUC</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="col-8">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Número de Documento</mat-label>
+          <!-- Si es Cédula usamos appCedula, si no, dejamos libre (o usamos OnlyNumbers para RUC) -->
+          @if (form.get("tipo_documento")?.value === "cedula") {
+            <input
+              matInput
+              formControlName="documento"
+              appCedula
+              maxlength="10"
+            />
+            @if (form.get("documento")?.hasError("cedulaInvalida")) {
+              <mat-error>{{
+                form.get("documento")?.getError("cedulaInvalida")
+              }}</mat-error>
+            }
+          } @else {
+            <input matInput formControlName="documento" maxlength="20" />
+          }
+
+          @if (form.get("documento")?.hasError("required")) {
+            <mat-error>El documento es obligatorio</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" formControlName="email" />
+        </mat-form-field>
+      </div>
+      <div class="col-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Teléfono</mat-label>
+          <input matInput formControlName="telefono" appOnlyNumbers />
+        </mat-form-field>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid || guardando"
+    (click)="guardar()"
+  >
+    {{ guardando ? "Guardando..." : "Guardar" }}
+  </button>
+</mat-dialog-actions>

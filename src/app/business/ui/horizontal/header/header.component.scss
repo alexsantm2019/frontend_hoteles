@@ -1,0 +1,32 @@
+// header.component.scss
+
+:host {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 1001; // ⭐ Mayor que el sidebar (1000)
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1001;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  
+  // ⭐ Transición suave para la sombra
+  transition: box-shadow 0.3s ease;
+  
+  // ⭐ Sombra al hacer scroll
+  &.shadow-scroll {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+}
+
+// ⭐ Ajuste para móviles
+@media (max-width: 768px) {
+  .topbar {
+    padding: 8px 12px;
+  }
+}

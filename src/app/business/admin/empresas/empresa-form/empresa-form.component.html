@@ -1,0 +1,66 @@
+<h2 mat-dialog-title>{{ esEdicion ? "Editar" : "Nueva" }} Empresa</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="d-flex flex-col gap-3 pt-2">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Nombre de la Empresa</mat-label>
+      <input
+        matInput
+        formControlName="nombre"
+        placeholder="Ej. Grupo Hotelero Lumini"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>RUC</mat-label>
+      <input matInput formControlName="ruc" placeholder="Ej. 1791234567001" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Dirección Matriz</mat-label>
+      <input
+        matInput
+        formControlName="direccion"
+        placeholder="Ej. Av. Amazonas y Naciones Unidas"
+      />
+    </mat-form-field>
+
+    <div class="row">
+      <div class="col-md-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Teléfono</mat-label>
+          <input
+            matInput
+            formControlName="telefono"
+            placeholder="Ej. 022345678"
+          />
+        </mat-form-field>
+      </div>
+      <div class="col-md-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Correo Electrónico</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="correo"
+            placeholder="contacto@empresa.com"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <mat-checkbox formControlName="activa" color="primary">
+      Empresa Activa
+    </mat-checkbox>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid || guardando"
+    (click)="guardar()"
+  >
+    {{ guardando ? "Guardando..." : "Guardar" }}
+  </button>
+</mat-dialog-actions>

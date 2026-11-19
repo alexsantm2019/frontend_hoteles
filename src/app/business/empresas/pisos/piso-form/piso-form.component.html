@@ -1,0 +1,25 @@
+<p>piso-form works!</p>
+<h2 mat-dialog-title>{{ data.piso ? "Editar" : "Nuevo" }} Piso</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="d-flex flex-col pt-2">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Número o Nombre del Piso</mat-label>
+      <input
+        matInput
+        formControlName="numero"
+        placeholder="Ej. 1, 2, Planta Baja"
+      />
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid || guardando"
+    (click)="guardar()"
+  >
+    Guardar
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,40 @@
+<h2 mat-dialog-title>Cargar Consumo a Reserva {{ data.reserva.codigo }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="d-flex flex-col gap-3 pt-2">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Producto en Habitación</mat-label>
+      <mat-select formControlName="producto">
+        @for (item of stockHabitacion; track item.id) {
+          <mat-option [value]="item.producto">
+            <!-- Mostramos el nombre, stock y precio -->
+            {{ item.producto_nombre }} - ${{
+              item.producto_precio_venta
+            }}
+            (Quedan: {{ item.cantidad }})
+          </mat-option>
+        } @empty {
+          <mat-option disabled>No hay productos en esta habitación</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Cantidad</mat-label>
+      <input matInput type="number" formControlName="cantidad" min="1" />
+      <!-- Podríamos agregar validación de máximo según el stock -->
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<!-- ACCIONES DEL MODAL (FALTABAN) -->
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid || guardando"
+    (click)="guardar()"
+  >
+    {{ guardando ? "Procesando..." : "Confirmar" }}
+  </button>
+</mat-dialog-actions>

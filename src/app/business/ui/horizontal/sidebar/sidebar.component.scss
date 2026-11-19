@@ -1,0 +1,36 @@
+// sidebar.component.scss
+
+:host {
+  display: block;
+  position: sticky;
+  top: 64px; // ⭐ Altura del header
+  z-index: 1000;
+  // ⭐ Asegurar que el contenedor no tenga overflow que rompa el sticky
+  overflow: visible !important;
+}
+
+.horizontal-sidebar {
+  position: sticky;
+  top: 64px;
+  z-index: 1000;
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  overflow: visible !important;
+  
+  // ⭐ Asegurar que el contenido del sidebar sea visible
+  .container {
+    overflow: visible !important;
+  }
+}
+
+// ⭐ Para móviles
+@media (max-width: 768px) {
+  :host {
+    top: 56px; // ⭐ Altura del header en móviles
+  }
+  
+  .horizontal-sidebar {
+    top: 56px;
+  }
+}

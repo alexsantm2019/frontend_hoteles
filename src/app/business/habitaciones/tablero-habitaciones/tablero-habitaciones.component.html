@@ -1,0 +1,114 @@
+<div class="p-24">
+  <!-- Encabezado y Leyendas -->
+  <div
+    class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3"
+  >
+    <h2 class="f-s-24 f-w-700 m-0">Tablero de Habitaciones</h2>
+
+    <div class="d-flex gap-3 flex-wrap align-items-center">
+      @for (estado of estadosLimpieza; track estado.id) {
+        <div
+          class="legend-item d-flex align-items-center gap-2 px-3 py-1 rounded-pill"
+          [ngStyle]="{
+            'background-color': (estado.color || '#6c757d') + '20',
+            color: estado.color || '#6c757d',
+            border: '1px solid ' + (estado.color || '#6c757d') + '40',
+          }"
+        >
+          <span
+            class="color-dot"
+            [ngStyle]="{ 'background-color': estado.color || '#6c757d' }"
+          ></span>
+          <span class="f-s-13 f-w-600">{{ estado.clave }}</span>
+        </div>
+      }
+    </div>
+    <button
+      mat-icon-button
+      color="primary"
+      (click)="cargarHabitaciones()"
+      matTooltip="Actualizar Tablero"
+    >
+      <i-tabler name="refresh" class="icon-20"></i-tabler>
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="text-center p-5"><mat-spinner diameter="40"></mat-spinner></div>
+  } @else {
+    <!-- Grid de habitaciones -->
+    <div class="row" style="margin-top: 10px">
+      @for (hab of habitaciones(); track hab.id) {
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-4">
+          <!-- Tarjeta con menú contextual -->
+          <mat-card
+            class="h-100 cursor-pointer room-card shadow-sm"
+            [matMenuTriggerFor]="menuEstado"
+            [matMenuTriggerData]="{ habitacion: hab }"
+            [ngStyle]="{
+              'border-top': '5px solid ' + getColorEstado(hab.estado_limpieza),
+            }"
+            [ngClass]="{ 'bg-light-primary': hab.ocupada }"
+          >
+            <mat-card-content class="p-3">
+              <div
+                class="d-flex justify-content-between align-items-start mb-2"
+              >
+                <h3 class="f-s-22 f-w-700 m-0">{{ hab.numero }}</h3>
+
+                <!-- Íconos de Ocupación -->
+                @if (hab.ocupada) {
+                  <i-tabler
+                    name="user"
+                    class="icon-20 text-primary"
+                    matTooltip="Ocupada"
+                  ></i-tabler>
+                } @else {
+                  <i-tabler
+                    name="user-off"
+                    class="icon-20 text-muted"
+                    matTooltip="Disponible"
+                  ></i-tabler>
+                }
+              </div>
+
+              <div class="text-muted f-s-14">{{ hab.tipo }}</div>
+
+              <!-- Nombre del estado de limpieza (opcional, para accesibilidad) -->
+              <div
+                class="mt-3 f-s-12 f-w-600"
+                [ngStyle]="{ color: getColorEstado(hab.estado_limpieza) }"
+              >
+                {{ getNombreLimpieza(hab.estado_limpieza) | uppercase }}
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Menú Contextual Compartido -->
+<mat-menu #menuEstado="matMenu">
+  <ng-template matMenuContent let-habitacion="habitacion">
+    <div class="px-3 py-2 text-muted f-s-12 f-w-600">Cambiar estado a:</div>
+
+    @for (estado of estadosLimpieza; track estado.id) {
+      @if (habitacion.estado_limpieza !== estado.valor) {
+        <button
+          mat-menu-item
+          (click)="actualizarEstado(habitacion, estado.valor)"
+        >
+          <div class="d-flex align-items-center gap-2">
+            <span
+              class="color-dot"
+              [ngStyle]="{ 'background-color': estado.color || '#ccc' }"
+            ></span>
+            {{ estado.clave }}
+          </div>
+        </button>
+      }
+    }
+  </ng-template>
+</mat-menu>

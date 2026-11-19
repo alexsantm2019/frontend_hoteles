@@ -1,0 +1,66 @@
+<div class="selector-container">
+  <mat-card class="selector-card">
+    <mat-card-header class="text-center justify-content-center mb-4 pt-4">
+      <mat-card-title class="f-s-24 f-w-700"
+        >Selecciona tu Hotel</mat-card-title
+      >
+      <mat-card-subtitle class="f-s-14 mt-2 text-muted">
+        Elige el establecimiento en el que vas a operar
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content style="margin-top: 20px">
+      @if (cargando()) {
+        <div class="d-flex justify-content-center p-5">
+          <mat-spinner diameter="40"></mat-spinner>
+        </div>
+      } @else {
+        <!-- Usamos mat-nav-list o mat-selection-list para mejor UI -->
+        <mat-selection-list [multiple]="false" class="hotel-list">
+          @for (hotel of hoteles(); track hotel.id) {
+            <mat-list-option
+              [value]="hotel"
+              [selected]="hotelActivo()?.id === hotel.id"
+              (selectionChange)="seleccionarHotel(hotel)"
+            >
+              <div class="d-flex align-items-center w-100 py-2">
+                <div
+                  class="hotel-icon bg-light-primary rounded d-flex align-items-center justify-content-center me-3"
+                >
+                  <i-tabler
+                    name="building-community"
+                    class="icon-24 text-primary"
+                  ></i-tabler>
+                </div>
+                <div class="d-flex flex-column">
+                  <span class="f-s-16 f-w-600 margin-left-10">{{
+                    hotel.nombre
+                  }}</span>
+                  <span class="f-s-12 text-muted margin-left-10">{{
+                    hotel.direccion || "Sin dirección registrada"
+                  }}</span>
+                </div>
+              </div>
+            </mat-list-option>
+          } @empty {
+            <div class="alert alert-warning text-center">
+              No tienes acceso a ningún hotel.
+            </div>
+          }
+        </mat-selection-list>
+      }
+    </mat-card-content>
+
+    <mat-card-actions class="p-1 pt-0">
+      <button
+        mat-flat-button
+        color="primary"
+        class="w-100 py-2 f-s-16"
+        [disabled]="!hotelActivo() || cargando()"
+        (click)="confirmarSeleccion()"
+      >
+        Confirmar y Continuar
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

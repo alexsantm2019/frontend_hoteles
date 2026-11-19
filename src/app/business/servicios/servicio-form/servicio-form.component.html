@@ -1,0 +1,60 @@
+<h2 mat-dialog-title>{{ esEdicion ? "Editar" : "Nuevo" }} Servicio</h2>
+
+<mat-dialog-content>
+  <form
+    [formGroup]="form"
+    class="d-flex flex-col gap-3 pt-4"
+    style="margin-top: 20px"
+  >
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Nombre del Servicio</mat-label>
+      <input
+        matInput
+        formControlName="nombre"
+        placeholder="Ej. Desayuno Buffet"
+      />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Descripción (Opcional)</mat-label>
+      <textarea matInput formControlName="descripcion" rows="2"></textarea>
+    </mat-form-field>
+
+    <div class="row">
+      <div class="col-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Precio ($)</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="precio"
+            appOnlyNumbers
+          />
+        </mat-form-field>
+      </div>
+      <div class="col-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Unidad de Cobro</mat-label>
+          <mat-select formControlName="unidad_cobro">
+            @for (unidad of unidadesCobro; track unidad.id) {
+              <!-- Guardamos el valor (ej. "2") y mostramos la clave (ej. "Por Persona") -->
+              <mat-option [value]="unidad.valor">{{ unidad.clave }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid || guardando"
+    (click)="guardar()"
+  >
+    {{ guardando ? "Guardando..." : "Guardar" }}
+  </button>
+</mat-dialog-actions>

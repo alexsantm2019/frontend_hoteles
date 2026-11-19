@@ -1,0 +1,285 @@
+<div class="p-24">
+  <div class="mb-4">
+    <h2 class="f-s-24 f-w-700 m-0">Dashboard Ejecutivo</h2>
+    <p class="text-muted f-s-14 m-0">
+      Bienvenido de nuevo. Aquí está el resumen de {{ hotelActivo()?.nombre }}
+    </p>
+  </div>
+
+  @if (cargando()) {
+    <div class="text-center p-5"><mat-spinner diameter="40"></mat-spinner></div>
+  } @else {
+    <!-- FILA 1: KPIs INMEDIATOS -->
+    <div class="row mb-3">
+      <!-- Ocupación -->
+      <div class="col-xl-3 col-md-6 mb-3">
+        <mat-card class="bg-light-primary border-0 shadow-sm h-100">
+          <mat-card-content
+            class="p-3 d-flex align-items-center justify-content-between"
+          >
+            <div>
+              <span class="text-muted f-s-12 f-w-600 d-block mb-1"
+                >OCUPACIÓN</span
+              >
+              <h2 class="f-s-28 f-w-700 m-0 text-primary">
+                {{ kpis().ocupacion }}%
+              </h2>
+              <span class="f-s-11 text-muted"
+                >{{ kpis().personas_alojadas }} de
+                {{ kpis().capacidad_maxima }} pax</span
+              >
+            </div>
+            <div
+              class="icon-45 bg-white rounded-circle text-primary d-flex align-items-center justify-content-center shadow-sm"
+            >
+              <mat-icon>pie_chart</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Llegadas y Salidas -->
+      <div class="col-xl-3 col-md-6 mb-3">
+        <mat-card class="bg-light-info border-0 shadow-sm h-100">
+          <mat-card-content
+            class="p-3 d-flex align-items-center justify-content-between"
+          >
+            <div>
+              <span class="text-muted f-s-12 f-w-600 d-block mb-1">HOY</span>
+              <h2 class="f-s-28 f-w-700 m-0 text-info">
+                {{ kpis().llegadas_hoy }}
+                <span class="f-s-14 text-muted">Llegadas</span>
+              </h2>
+              <span class="f-s-11 text-muted"
+                >{{ kpis().salidas_hoy }} Salidas pendientes</span
+              >
+            </div>
+            <div
+              class="icon-45 bg-white rounded-circle text-info d-flex align-items-center justify-content-center shadow-sm"
+            >
+              <mat-icon>flight_land</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Dinero en Caja -->
+      <div class="col-xl-3 col-md-6 mb-3">
+        <mat-card class="bg-light-success border-0 shadow-sm h-100">
+          <mat-card-content
+            class="p-3 d-flex align-items-center justify-content-between"
+          >
+            <div>
+              <span class="text-muted f-s-12 f-w-600 d-block mb-1"
+                >EFECTIVO EN CAJA</span
+              >
+              <h2 class="f-s-28 f-w-700 m-0 text-success">
+                ${{ kpis().efectivo_caja }}
+              </h2>
+              <span class="f-s-11 text-muted">Turno actual</span>
+            </div>
+            <div
+              class="icon-45 bg-white rounded-circle text-success d-flex align-items-center justify-content-center shadow-sm"
+            >
+              <mat-icon>point_of_sale</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Saldos por Cobrar -->
+      <div class="col-xl-3 col-md-6 mb-3">
+        <mat-card class="bg-light-error border-0 shadow-sm h-100">
+          <mat-card-content
+            class="p-3 d-flex align-items-center justify-content-between"
+          >
+            <div>
+              <span class="text-muted f-s-12 f-w-600 d-block mb-1"
+                >SALDOS POR COBRAR</span
+              >
+              <h2 class="f-s-28 f-w-700 m-0 text-error">
+                ${{ kpis().saldos_por_cobrar }}
+              </h2>
+              <span class="f-s-11 text-muted">En reservas activas</span>
+            </div>
+            <div
+              class="icon-45 bg-white rounded-circle text-error d-flex align-items-center justify-content-center shadow-sm"
+            >
+              <mat-icon>receipt_long</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- FILA 2: GRÁFICOS FINANCIEROS -->
+    <div class="row mb-3">
+      <div class="col-lg-8 mb-3">
+        <mat-card class="h-100 shadow-sm border-0">
+          <mat-card-header class="p-3 border-bottom">
+            <mat-card-title class="f-s-16 f-w-600 m-0"
+              >Ingresos Últimos 7 Días</mat-card-title
+            >
+          </mat-card-header>
+          <mat-card-content class="pt-3">
+            <apx-chart
+              [series]="chartIngresos.series"
+              [chart]="chartIngresos.chart"
+              [colors]="chartIngresos.colors"
+              [stroke]="chartIngresos.stroke"
+              [xaxis]="chartIngresos.xaxis"
+              [dataLabels]="chartIngresos.dataLabels"
+            ></apx-chart>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="col-lg-4 mb-3">
+        <mat-card class="h-100 shadow-sm border-0">
+          <mat-card-header class="p-3 border-bottom">
+            <mat-card-title class="f-s-16 f-w-600 m-0"
+              >Distribución de Ingresos (Mes)</mat-card-title
+            >
+          </mat-card-header>
+          <mat-card-content class="pt-3 d-flex justify-content-center">
+            <apx-chart
+              [series]="chartDonut.series"
+              [chart]="chartDonut.chart"
+              [labels]="chartDonut.labels"
+              [colors]="chartDonut.colors"
+              [legend]="chartDonut.legend"
+            ></apx-chart>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- FILA 3: OPERACIONES Y TOPs -->
+    <div class="row mb-3">
+      <!-- Housekeeping -->
+      <div class="col-lg-4 mb-3">
+        <mat-card class="h-100 shadow-sm border-0">
+          <mat-card-header class="p-3 border-bottom">
+            <mat-card-title class="f-s-16 f-w-600 m-0"
+              >Estado Habitaciones</mat-card-title
+            >
+          </mat-card-header>
+          <mat-card-content class="pt-3">
+            <apx-chart
+              [series]="chartHousekeeping.series"
+              [chart]="chartHousekeeping.chart"
+              [plotOptions]="chartHousekeeping.plotOptions"
+              [colors]="chartHousekeeping.colors"
+              [xaxis]="chartHousekeeping.xaxis"
+              [dataLabels]="chartHousekeeping.dataLabels"
+            ></apx-chart>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Top Habitaciones -->
+      <div class="col-lg-4 mb-3">
+        <mat-card class="h-100 shadow-sm border-0">
+          <mat-card-header class="p-3 border-bottom">
+            <mat-card-title class="f-s-16 f-w-600 m-0"
+              >Top Habitaciones (Ingresos)</mat-card-title
+            >
+          </mat-card-header>
+          <mat-card-content class="p-3">
+            <ul class="list-unstyled mb-0">
+              @for (
+                hab of topHabitaciones;
+                track hab.habitacion__numero;
+                let i = $index
+              ) {
+                <li
+                  class="d-flex justify-content-between align-items-center py-2 border-bottom"
+                >
+                  <div class="d-flex align-items-center gap-2">
+                    <span
+                      class="badge bg-light-primary text-primary rounded-circle"
+                      style="
+                        width: 24px;
+                        height: 24px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                      >{{ i + 1 }}</span
+                    >
+                    <span class="f-w-600"
+                      >Hab. {{ hab.habitacion__numero }}</span
+                    >
+                  </div>
+                  <span class="text-success f-w-700">${{ hab.ingresos }}</span>
+                </li>
+              } @empty {
+                <li class="text-muted text-center py-3">Sin datos</li>
+              }
+            </ul>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Top Minibar -->
+      <div class="col-lg-4 mb-3">
+        <mat-card class="h-100 shadow-sm border-0">
+          <mat-card-header class="p-3 border-bottom">
+            <mat-card-title class="f-s-16 f-w-600 m-0"
+              >Top Minibar</mat-card-title
+            >
+          </mat-card-header>
+          <mat-card-content class="p-3">
+            <ul class="list-unstyled mb-0">
+              @for (
+                prod of topMinibar;
+                track prod.producto__nombre;
+                let i = $index
+              ) {
+                <li
+                  class="d-flex justify-content-between align-items-center py-2 border-bottom"
+                >
+                  <div class="d-flex align-items-center gap-2">
+                    <mat-icon class="text-warning">local_bar</mat-icon>
+                    <span class="f-w-600">{{ prod.producto__nombre }}</span>
+                  </div>
+                  <span class="badge bg-light-warning text-warning"
+                    >{{ prod.cantidad }} vendidos</span
+                  >
+                </li>
+              } @empty {
+                <li class="text-muted text-center py-3">Sin datos</li>
+              }
+            </ul>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- FILA 4: PROYECCIÓN -->
+    <div class="row">
+      <div class="col-12 mb-3">
+        <mat-card class="shadow-sm border-0">
+          <mat-card-header
+            class="p-3 border-bottom d-flex justify-content-between align-items-center"
+          >
+            <mat-card-title class="f-s-16 f-w-600 m-0"
+              >Proyección de Ocupación (Próximos 7 Días)</mat-card-title
+            >
+            <span class="badge bg-light-primary text-primary">Forecast</span>
+          </mat-card-header>
+          <mat-card-content class="pt-3">
+            <apx-chart
+              [series]="chartProyeccion.series"
+              [chart]="chartProyeccion.chart"
+              [colors]="chartProyeccion.colors"
+              [plotOptions]="chartProyeccion.plotOptions"
+              [xaxis]="chartProyeccion.xaxis"
+              [dataLabels]="chartProyeccion.dataLabels"
+            ></apx-chart>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

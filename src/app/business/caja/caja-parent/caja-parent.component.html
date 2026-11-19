@@ -1,0 +1,214 @@
+<div class="p-24 max-w-1000 mx-auto">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="f-s-24 f-w-700 m-0">Caja y Turnos</h2>
+    <button mat-stroked-button color="primary" (click)="cargarTurnos()">
+      <i-tabler name="refresh" class="icon-18 me-1"></i-tabler> Refrescar
+    </button>
+    @if (!turnoAbierto() && !cargando()) {
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="mostrarFormularioApertura = true"
+      >
+        <i-tabler name="lock-open" class="icon-18 me-2"></i-tabler> Abrir Caja
+      </button>
+    }
+    @if (turnoAbierto()) {
+      <button
+        mat-flat-button
+        color="warn"
+        (click)="mostrarFormularioCierre = true"
+      >
+        <i-tabler name="lock" class="icon-18 me-2"></i-tabler> Cerrar Caja
+      </button>
+    }
+  </div>
+
+  <!-- Formulario de Apertura -->
+  @if (mostrarFormularioApertura) {
+    <mat-card class="mb-4 bg-light">
+      <mat-card-content class="pt-4">
+        <form
+          [formGroup]="formApertura"
+          class="d-flex align-items-center gap-3"
+        >
+          <mat-form-field appearance="outline" class="w-50 mb-0">
+            <mat-label>Fondo Inicial en Efectivo ($)</mat-label>
+            <input matInput type="number" formControlName="saldo_inicial" />
+          </mat-form-field>
+          <button
+            mat-flat-button
+            color="primary"
+            (click)="abrirCaja()"
+            [disabled]="formApertura.invalid"
+          >
+            Abrir
+          </button>
+          <button mat-button (click)="mostrarFormularioApertura = false">
+            Cancelar
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Estado de la Caja Actual -->
+  @if (turnoAbierto()) {
+    <mat-card class="mb-4 bg-light-success">
+      <mat-card-content
+        class="d-flex justify-content-between align-items-center p-3"
+      >
+        <div>
+          <h4 class="f-s-18 f-w-600 m-0">Caja Abierta</h4>
+          <span class="text-muted f-s-12"
+            >Abierta el
+            {{ turnoAbierto()?.fecha_apertura | date: "dd/MM/yyyy HH:mm" }} por
+            {{ turnoAbierto()?.usuario_apertura_nombre }}</span
+          >
+        </div>
+        <div class="text-end">
+          <span class="f-s-12 text-muted d-block">Fondo Inicial</span>
+          <span class="f-s-24 f-w-700"
+            >${{ turnoAbierto()?.saldo_inicial }}</span
+          >
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Formulario de Cierre -->
+  @if (mostrarFormularioCierre) {
+    <mat-card class="mb-4 bg-light-warning">
+      <mat-card-content class="pt-4">
+        <h4 class="f-s-18 f-w-600 mb-3">Cierre de Caja</h4>
+        <form [formGroup]="formCierre" class="row" style="margin-top: 20px">
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Efectivo Real Contado ($)</mat-label>
+              <input
+                matInput
+                type="number"
+                formControlName="saldo_final_real"
+              />
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Observaciones</mat-label>
+              <input matInput formControlName="observaciones" />
+            </mat-form-field>
+          </div>
+          <div class="col-12 text-end">
+            <button mat-button (click)="mostrarFormularioCierre = false">
+              Cancelar
+            </button>
+            <button
+              mat-flat-button
+              color="warn"
+              (click)="cerrarCaja()"
+              [disabled]="formCierre.invalid"
+            >
+              Confirmar Cierre
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Historial de Turnos -->
+  <mat-card>
+    <mat-card-content class="p-0">
+      <table mat-table [dataSource]="turnos()" class="w-100">
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef>Apertura</th>
+          <td mat-cell *matCellDef="let t">
+            {{ t.fecha_apertura | date: "dd/MM/yyyy HH:mm" }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="usuario">
+          <th mat-header-cell *matHeaderCellDef>Cajero</th>
+          <td mat-cell *matCellDef="let t">{{ t.usuario_apertura_nombre }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="inicial">
+          <th mat-header-cell *matHeaderCellDef>Inicial</th>
+          <td mat-cell *matCellDef="let t">${{ t.saldo_inicial }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="calculado">
+          <th mat-header-cell *matHeaderCellDef>Esperado</th>
+          <td mat-cell *matCellDef="let t">
+            ${{ t.saldo_esperado_actual || 0 }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="real">
+          <th mat-header-cell *matHeaderCellDef>Real</th>
+          <td mat-cell *matCellDef="let t">${{ t.saldo_final_real || 0 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="diferencia">
+          <th mat-header-cell *matHeaderCellDef>Diferencia</th>
+          <td mat-cell *matCellDef="let t">
+            <span
+              [class.text-success]="t.diferencia === 0"
+              [class.text-error]="t.diferencia !== 0"
+            >
+              ${{ t.diferencia || 0 }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let t">
+            <span
+              class="badge"
+              [ngClass]="{
+                'bg-light-success text-success': t.estado === 'abierta',
+                'bg-light-secondary text-secondary': t.estado === 'cerrada',
+              }"
+            >
+              {{ t.estado | uppercase }}
+            </span>
+          </td>
+        </ng-container>
+
+        <tr
+          mat-header-row
+          *matHeaderRowDef="[
+            'fecha',
+            'usuario',
+            'inicial',
+            'calculado',
+            'real',
+            'diferencia',
+            'estado',
+          ]"
+        ></tr>
+        <tr
+          mat-row
+          *matRowDef="
+            let row;
+            columns: [
+              'fecha',
+              'usuario',
+              'inicial',
+              'calculado',
+              'real',
+              'diferencia',
+              'estado',
+            ]
+          "
+        ></tr>
+      </table>
+      @if (turnos().length === 0) {
+        <div class="p-4 text-center text-muted">
+          No hay turnos de caja registrados.
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

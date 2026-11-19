@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>{{ esEdicion ? "Editar Edificio" : "Nuevo Edificio" }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="d-flex flex-col pt-2">
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Nombre del Edificio</mat-label>
+      <input
+        matInput
+        formControlName="nombre"
+        placeholder="Ej. Torre A"
+        cdkFocusInitial
+      />
+      @if (form.get("nombre")?.hasError("required")) {
+        <mat-error>El nombre es obligatorio</mat-error>
+      }
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid || guardando"
+    (click)="guardar()"
+  >
+    {{ guardando ? "Guardando..." : "Guardar" }}
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,104 @@
+<div class="blank-layout-container justify-content-center">
+  <div class="auth-wrapper">
+    <div class="position-relative shaper-wrapper">
+      <div class="w-100 position-relative rounded bg-white auth-card">
+        <div class="auth-body">
+          <div class="row align-items-center">
+            <div class="col-lg-6">
+              <div
+                class="align-items-center justify-content-center d-none d-lg-flex"
+              >
+                <img
+                  src="/assets/images-app/images/sustainable.jpg"
+                  alt="login"
+                  class="rounded mx-auto"
+                />
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div
+                class="d-flex align-items-start align-items-lg-center justify-content-center"
+              >
+                <div class="row justify-content-center w-100">
+                  <div class="col-lg-11">
+                    <h4 class="f-w-700 f-s-30 m-0 m-t-20 lh-base text-center">
+                      Administración hoteles
+                    </h4>
+
+                    <form
+                      class="m-t-30"
+                      [formGroup]="form"
+                      (ngSubmit)="login()"
+                    >
+                      <!-- Campo Email (mapeado a 'uname' en el TS) -->
+                      <mat-label class="f-s-14 f-w-600 m-b-12 d-block"
+                        >Usuario</mat-label
+                      >
+                      <mat-form-field
+                        appearance="outline"
+                        class="w-100"
+                        color="primary"
+                      >
+                        <!-- Cambiamos el type="email" a type="text" -->
+                        <input matInput type="text" formControlName="uname" />
+                        <!-- ... tus mensajes de error ... -->
+                      </mat-form-field>
+
+                      <!-- Campo Password -->
+                      <mat-label class="f-s-14 f-w-600 m-b-12 d-block"
+                        >Contraseña</mat-label
+                      >
+                      <mat-form-field
+                        appearance="outline"
+                        class="w-100"
+                        color="primary"
+                      >
+                        <input
+                          matInput
+                          type="password"
+                          formControlName="password"
+                        />
+                        @if (f["password"].touched && f["password"].invalid) {
+                          <mat-hint class="m-b-16 error-msg">
+                            @if (
+                              f["password"].errors &&
+                              f["password"].errors["required"]
+                            ) {
+                              <div class="text-error">
+                                La contraseña es requerida.
+                              </div>
+                            }
+                          </mat-hint>
+                        }
+                      </mat-form-field>
+
+                      <!-- Mensaje de error global (credenciales inválidas, servidor caído, etc) -->
+                      @if (error()) {
+                        <div
+                          class="text-error m-b-12 text-center"
+                          style="font-size: 14px"
+                        >
+                          {{ error() }}
+                        </div>
+                      }
+
+                      <!-- Botón de Enviar -->
+                      <button
+                        mat-flat-button
+                        color="primary"
+                        class="w-100"
+                        [disabled]="!form.valid || loading()"
+                      >
+                        {{ loading() ? "Ingresando..." : "Sign In" }}
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

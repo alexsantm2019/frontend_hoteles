@@ -1,0 +1,158 @@
+<div class="p-24">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="f-s-24 f-w-700 m-0">Control de Inventario</h2>
+    <!-- BOTÓN PARA INGRESO MANUAL -->
+    <button mat-flat-button color="primary" (click)="abrirModalIngreso()">
+      <i-tabler name="plus" class="icon-18 me-2"></i-tabler> Ingreso a Bodega
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="text-center p-5"><mat-spinner diameter="40"></mat-spinner></div>
+  } @else {
+    <mat-tab-group animationDuration="0ms">
+      <!-- PESTAÑA 1: BODEGA CENTRAL -->
+      <mat-tab label="Bodega Central">
+        <div class="pt-4">
+          <mat-card>
+            <mat-card-content class="p-0">
+              <table mat-table [dataSource]="stockBodega()" class="w-100">
+                <ng-container matColumnDef="producto">
+                  <th mat-header-cell *matHeaderCellDef>Producto</th>
+                  <td mat-cell *matCellDef="let s">
+                    <strong>{{ s.producto_nombre }}</strong>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="cantidad">
+                  <th mat-header-cell *matHeaderCellDef>Cantidad en Bodega</th>
+                  <td mat-cell *matCellDef="let s">
+                    <span class="badge bg-light-primary text-primary f-s-14"
+                      >{{ s.cantidad }} unidades</span
+                    >
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef class="text-end">
+                    Acciones
+                  </th>
+                  <td mat-cell *matCellDef="let s" class="text-end">
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      (click)="abrirModalStock(s, 'ingreso')"
+                      matTooltip="Ingresar más"
+                    >
+                      <i-tabler
+                        name="arrow-down-circle"
+                        class="icon-18"
+                      ></i-tabler>
+                    </button>
+                    <button
+                      mat-icon-button
+                      color="accent"
+                      (click)="abrirModalStock(s, 'transferencia')"
+                      matTooltip="Transferir a Habitación"
+                    >
+                      <i-tabler name="transfer" class="icon-18"></i-tabler>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr
+                  mat-header-row
+                  *matHeaderRowDef="['producto', 'cantidad', 'acciones']"
+                ></tr>
+                <tr
+                  mat-row
+                  *matRowDef="
+                    let row;
+                    columns: ['producto', 'cantidad', 'acciones']
+                  "
+                ></tr>
+              </table>
+              @if (stockBodega().length === 0) {
+                <div class="p-4 text-center text-muted">
+                  No hay stock en bodega. Realiza un ingreso.
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- PESTAÑA 2: STOCK EN HABITACIONES -->
+      <mat-tab label="Minibar (Habitaciones)">
+        <div class="pt-4">
+          <mat-card>
+            <mat-card-content class="p-0">
+              <table mat-table [dataSource]="stockHabitaciones()" class="w-100">
+                <ng-container matColumnDef="habitacion">
+                  <th mat-header-cell *matHeaderCellDef>Habitación</th>
+                  <td mat-cell *matCellDef="let s">
+                    Hab. {{ s.habitacion_numero }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="producto">
+                  <th mat-header-cell *matHeaderCellDef>Producto</th>
+                  <td mat-cell *matCellDef="let s">{{ s.producto_nombre }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="cantidad">
+                  <th mat-header-cell *matHeaderCellDef>Stock</th>
+                  <td mat-cell *matCellDef="let s">
+                    <span
+                      class="f-w-600"
+                      [class.text-error]="s.cantidad <= 1"
+                      >{{ s.cantidad }}</span
+                    >
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef class="text-end">
+                    Acciones
+                  </th>
+                  <td mat-cell *matCellDef="let s" class="text-end">
+                    <button
+                      mat-icon-button
+                      color="accent"
+                      (click)="abrirModalStock(s, 'transferencia')"
+                      matTooltip="Transferir más"
+                    >
+                      <i-tabler name="transfer" class="icon-18"></i-tabler>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr
+                  mat-header-row
+                  *matHeaderRowDef="[
+                    'habitacion',
+                    'producto',
+                    'cantidad',
+                    'acciones',
+                  ]"
+                ></tr>
+                <tr
+                  mat-row
+                  *matRowDef="
+                    let row;
+                    columns: ['habitacion', 'producto', 'cantidad', 'acciones']
+                  "
+                ></tr>
+              </table>
+              @if (stockHabitaciones().length === 0) {
+                <div class="p-4 text-center text-muted">
+                  No hay stock en habitaciones.
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>

@@ -1,0 +1,237 @@
+<h2 mat-dialog-title>Nueva Reserva</h2>
+<mat-dialog-content class="mat-typography" style="max-height: 70vh">
+  <form [formGroup]="form" class="d-flex flex-col gap-3">
+    <!-- SECCIÓN 1: Datos Generales -->
+    <div class="row" style="margin-top: 10px">
+      <div class="col-md-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Huésped Titular</mat-label>
+          <mat-select formControlName="huesped_titular">
+            @for (h of huespedes; track h.id) {
+              <mat-option [value]="h.id"
+                >{{ h.nombres }} {{ h.apellidos }}</mat-option
+              >
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="col-md-3">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Adultos</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="cantidad_adultos"
+            min="1"
+          />
+        </mat-form-field>
+      </div>
+      <div class="col-md-3">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Niños</mat-label>
+          <input
+            matInput
+            type="number"
+            formControlName="cantidad_ninos"
+            min="0"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Fecha Entrada</mat-label>
+          <input
+            matInput
+            [matDatepicker]="pickerEntrada"
+            formControlName="fecha_entrada"
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="pickerEntrada"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #pickerEntrada></mat-datepicker>
+        </mat-form-field>
+      </div>
+      <div class="col-md-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Fecha Salida</mat-label>
+          <input
+            matInput
+            [matDatepicker]="pickerSalida"
+            formControlName="fecha_salida"
+          />
+          <mat-datepicker-toggle
+            matIconSuffix
+            [for]="pickerSalida"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #pickerSalida></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2: Habitaciones -->
+    <h4 class="f-s-16 f-w-600 mt-3 mb-0">Habitaciones Disponibles</h4>
+    <div class="border rounded p-3 bg-light margin-top-20">
+      @if (buscandoHabitaciones) {
+        <div class="text-center"><mat-spinner diameter="30"></mat-spinner></div>
+      } @else {
+        <div class="row">
+          @for (hab of habitacionesDisponibles; track hab.id) {
+            <div class="col-md-4 mb-2">
+              <mat-checkbox (change)="toggleHabitacion(hab, $event)">
+                Hab. {{ hab.numero }} (Cap. {{ hab.capacidad_maxima }}) - ${{
+                  hab.precio_base
+                }}
+              </mat-checkbox>
+            </div>
+          } @empty {
+            <div
+              class="text-muted text-center py-2 border rounded bg-light w-100"
+            >
+              Seleccione fechas para ver disponibilidad.
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- SECCIÓN 3: Acompañantes -->
+    <div
+      class="d-flex justify-content-between align-items-center mt-3 mb-2 margin-top-20"
+    >
+      <div>
+        <h4 class="f-s-16 f-w-600 m-0">Acompañantes</h4>
+        <small class="text-muted f-s-12">
+          Has declarado {{ form.get("cantidad_adultos")?.value }} adultos
+          (incluyéndote) y {{ form.get("cantidad_ninos")?.value }} niños.
+          Registrados: {{ totalAcompanantes }} de
+          {{
+            form.get("cantidad_adultos")?.value -
+              1 +
+              form.get("cantidad_ninos")?.value
+          }}.
+        </small>
+      </div>
+      <button
+        type="button"
+        mat-stroked-button
+        color="primary"
+        (click)="agregarAcompanante()"
+        [disabled]="!puedeAgregarAcompanante"
+      >
+        + Agregar Acompañante
+      </button>
+    </div>
+
+    <div formArrayName="acompanantes" class="d-flex flex-col gap-2">
+      @for (acomp of acompanantesArray.controls; track $index; let i = $index) {
+        <div
+          [formGroupName]="i"
+          class="row align-items-center bg-light rounded p-2 m-0"
+        >
+          <!-- Ícono indicador -->
+          <div class="col-auto pe-0">
+            <i-tabler
+              [name]="acomp.value.es_nino ? 'baby-carriage' : 'user'"
+              class="icon-20 text-muted"
+            ></i-tabler>
+          </div>
+
+          <div class="col-md-4">
+            <mat-form-field appearance="outline" class="w-100 mb-0 density-3">
+              <mat-label>Nombres</mat-label>
+              <input matInput formControlName="nombres" />
+            </mat-form-field>
+          </div>
+          <div class="col-md-4">
+            <mat-form-field appearance="outline" class="w-100 mb-0 density-3">
+              <mat-label>Apellidos</mat-label>
+              <input matInput formControlName="apellidos" />
+            </mat-form-field>
+          </div>
+          <div class="col-md-2">
+            <mat-checkbox formControlName="es_nino" color="primary"
+              >Es Niño</mat-checkbox
+            >
+          </div>
+          <div class="col-md-1 text-end">
+            <button
+              type="button"
+              mat-icon-button
+              color="warn"
+              (click)="eliminarAcompanante(i)"
+            >
+              <i-tabler name="trash" class="icon-18"></i-tabler>
+            </button>
+          </div>
+        </div>
+      } @empty {
+        <div
+          class="text-muted f-s-14 text-center py-2 border rounded bg-light margin-top-5"
+        >
+          No has agregado acompañantes. (El huésped titular ya cuenta en el
+          conteo).
+        </div>
+      }
+    </div>
+
+    <!-- SECCIÓN 4: Totales -->
+    <div class="row bg-light rounded pt-3 mt-3 margin-top-20">
+      <div class="col-md-3 margin-top-5">
+        <span class="f-s-12 text-muted d-block">Calculado</span>
+        <span class="f-s-18 f-w-600"
+          >${{ form.get("subtotal_calculado")?.value }}</span
+        >
+        <div class="f-s-11 text-muted mt-1 text-muted">
+          <small>(Hab. + Niños) x Noches</small>
+        </div>
+      </div>
+      <div class="col-md-3 margin-top-5">
+        <mat-form-field appearance="outline" class="w-100 mb-0">
+          <mat-label>Subtotal Final</mat-label>
+          <input matInput type="number" formControlName="subtotal_final" />
+        </mat-form-field>
+      </div>
+      <div class="col-md-3 margin-top-5">
+        <mat-form-field appearance="outline" class="w-100 mb-0">
+          <mat-label>Descuento</mat-label>
+          <input matInput type="number" formControlName="descuento" />
+        </mat-form-field>
+      </div>
+      <div class="col-md-3 text-center">
+        <span class="f-s-12 text-muted d-block">Total a Pagar</span>
+        <span class="f-s-12 text-muted d-block"
+          >IVA ( <b>{{ ivaMostrado }}%</b>)</span
+        >
+        <span class="f-s-24 f-w-700 text-primary"
+          >${{ form.get("total")?.value }}</span
+        >
+      </div>
+      <div class="col-md-12 mt-2">
+        <mat-form-field appearance="outline" class="w-100 mb-0">
+          <mat-label>Motivo de Ajuste (Opcional)</mat-label>
+          <input
+            matInput
+            formControlName="motivo_ajuste"
+            placeholder="Ej. Descuento por cliente frecuente"
+          />
+        </mat-form-field>
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid || habitacionesArray.length === 0 || guardando"
+    (click)="guardar()"
+  >
+    {{ guardando ? "Guardando..." : "Crear Reserva" }}
+  </button>
+</mat-dialog-actions>

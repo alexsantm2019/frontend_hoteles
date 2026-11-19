@@ -1,0 +1,494 @@
+<div class="p-24">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="f-s-24 f-w-700 m-0">Gestión de Reservas</h2>
+    <button mat-flat-button color="primary" (click)="abrirFormulario()">
+      <i-tabler name="plus" class="icon-18 me-2"></i-tabler>
+      Nueva Reserva
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="text-center p-5"><mat-spinner diameter="40"></mat-spinner></div>
+  } @else {
+    <mat-card>
+      <mat-card-content class="p-0">
+        <table
+          mat-table
+          [dataSource]="reservas()"
+          multiTemplateDataRows
+          class="w-100"
+        >
+          <ng-container matColumnDef="codigo">
+            <th mat-header-cell *matHeaderCellDef>Código</th>
+            <td mat-cell *matCellDef="let res">
+              <strong>{{ res.codigo }}</strong>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="huesped">
+            <th mat-header-cell *matHeaderCellDef>Huésped</th>
+            <td mat-cell *matCellDef="let res">
+              {{ res.huesped_titular_nombre }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="fechas">
+            <th mat-header-cell *matHeaderCellDef>Entrada / Salida</th>
+            <td mat-cell *matCellDef="let res">
+              {{ res.fecha_entrada | date: "dd/MM/yyyy HH:mm" }} <br />
+              <span class="text-muted f-s-12"
+                >hasta {{ res.fecha_salida | date: "dd/MM/yyyy HH:mm" }}</span
+              >
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let res">
+              <span
+                class="badge"
+                [ngClass]="{
+                  'bg-light-warning text-warning': res.estado === '1',
+                  'bg-light-success text-success': res.estado === '2',
+                  'bg-light-primary text-primary': res.estado === '3',
+                  'bg-light-secondary text-secondary': res.estado === '4',
+                  'bg-light-error text-error': res.estado === '5',
+                }"
+              >
+                {{ getNombreEstado(res.estado) | uppercase }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="total">
+            <th mat-header-cell *matHeaderCellDef>Total</th>
+            <td mat-cell *matCellDef="let res">${{ res.total }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="saldo">
+            <th mat-header-cell *matHeaderCellDef>Saldo</th>
+            <td mat-cell *matCellDef="let res">
+              <span
+                class="f-w-600"
+                [class.text-success]="(res.saldo_pendiente ?? 0) <= 0"
+                [class.text-error]="(res.saldo_pendiente ?? 0) > 0"
+              >
+                ${{ res.saldo_pendiente ?? 0 | number: "1.2-2" }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="text-end">Acciones</th>
+            <td mat-cell *matCellDef="let res" class="text-end">
+              <!-- BOTÓN DE PDF (Agregado aquí) -->
+              <button
+                mat-icon-button
+                color="primary"
+                matTooltip="Descargar Estado de Cuenta"
+                (click)="descargarPDF(res); $event.stopPropagation()"
+              >
+                <i-tabler name="file-type-pdf" class="icon-18"></i-tabler>
+              </button>
+              <button
+                mat-icon-button
+                color="primary"
+                (click)="toggleRow(res); $event.stopPropagation()"
+                matTooltip="Ver Detalle"
+              >
+                <i-tabler
+                  [name]="
+                    expandedElement === res ? 'chevron-up' : 'chevron-down'
+                  "
+                  class="icon-18"
+                ></i-tabler>
+              </button>
+              @if ((res.saldo_pendiente ?? 0) > 0 && res.estado !== "5") {
+                <button
+                  mat-icon-button
+                  color="accent"
+                  matTooltip="Registrar Pago"
+                  (click)="abrirPago(res); $event.stopPropagation()"
+                >
+                  <i-tabler name="cash" class="icon-18"></i-tabler>
+                </button>
+              }
+              @if (res.estado === "1" || res.estado === "2") {
+                <button
+                  mat-icon-button
+                  color="primary"
+                  matTooltip="Hacer Check-in"
+                  (click)="
+                    cambiarEstado(res, '3', 'Check-in', '¿Confirmar llegada?');
+                    $event.stopPropagation()
+                  "
+                >
+                  <i-tabler name="login" class="icon-18"></i-tabler>
+                </button>
+                <button
+                  mat-icon-button
+                  color="warn"
+                  matTooltip="Cancelar Reserva"
+                  (click)="
+                    cambiarEstado(res, '5', 'Cancelar', '¿Cancelar reserva?');
+                    $event.stopPropagation()
+                  "
+                >
+                  <i-tabler name="x" class="icon-18"></i-tabler>
+                </button>
+              }
+              @if (res.estado === "3") {
+                <button
+                  mat-icon-button
+                  color="accent"
+                  matTooltip="Hacer Check-out"
+                  (click)="
+                    cambiarEstado(res, '4', 'Check-out', '¿Confirmar salida?');
+                    $event.stopPropagation()
+                  "
+                >
+                  <i-tabler name="logout" class="icon-18"></i-tabler>
+                </button>
+              }
+            </td>
+          </ng-container>
+
+          <!-- COLUMNA EXPANDIBLE -->
+
+          <ng-container matColumnDef="expandedDetail">
+            <td mat-cell *matCellDef="let res" [attr.colspan]="7" class="p-0">
+              <!-- Contenedor principal que se expande -->
+              <div
+                *ngIf="expandedElement === res"
+                class="detail-row-content p-4 bg-light border-bottom"
+              >
+                <!-- Usamos flexbox puro en lugar del grid de Bootstrap para evitar conflictos -->
+                <div class="d-flex flex-column flex-md-row gap-4">
+                  <!-- COLUMNA 1: ESTANCIA -->
+                  <div class="flex-fill" style="min-width: 250px">
+                    <!-- Habitaciones -->
+                    <div class="mb-4">
+                      <span
+                        class="text-muted f-s-12 f-w-600 text-uppercase d-block mb-2"
+                        >Habitaciones</span
+                      >
+                      <ul class="list-unstyled mb-0">
+                        <li
+                          *ngFor="let detalle of res.detalles"
+                          class="d-flex justify-content-between py-1 f-s-14"
+                        >
+                          <span
+                            ><i-tabler
+                              name="door"
+                              class="icon-14 me-2 text-muted"
+                            ></i-tabler>
+                            Hab. {{ detalle.habitacion }}</span
+                          >
+                          <span class="f-w-600"
+                            >${{ detalle.precio_base_habitacion }}</span
+                          >
+                        </li>
+                      </ul>
+                    </div>
+
+                    <!-- Acompañantes -->
+                    <div>
+                      <span
+                        class="text-muted f-s-12 f-w-600 text-uppercase d-block mb-2"
+                        >Acompañantes</span
+                      >
+                      <ul class="list-unstyled mb-0">
+                        <li
+                          *ngFor="let acomp of res.acompanantes"
+                          class="d-flex align-items-center py-1 f-s-14"
+                        >
+                          <i-tabler
+                            name="user"
+                            class="icon-14 me-2 text-muted"
+                          ></i-tabler>
+                          <span class="flex-grow-1"
+                            >{{ acomp.nombres }} {{ acomp.apellidos }}</span
+                          >
+                          <span
+                            *ngIf="acomp.es_nino"
+                            class="badge bg-light-warning text-warning f-s-11 py-0 px-1"
+                            >Niño</span
+                          >
+                        </li>
+                        <li
+                          *ngIf="
+                            !res.acompanantes || res.acompanantes.length === 0
+                          "
+                          class="text-muted f-s-13 py-1"
+                        >
+                          Sin acompañantes registrados.
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <!-- COLUMNA 2: CONSUMOS Y SERVICIOS -->
+                  <div class="flex-fill" style="min-width: 300px">
+                    <!-- Servicios -->
+                    <div class="mb-4">
+                      <div
+                        class="d-flex justify-content-between align-items-center mb-2"
+                      >
+                        <span class="text-muted f-s-12 f-w-600 text-uppercase"
+                          >Servicios Adicionales</span
+                        >
+                        <button
+                          mat-icon-button
+                          color="primary"
+                          class="btn-sm-icon"
+                          (click)="
+                            abrirModalServicio(res); $event.stopPropagation()
+                          "
+                          matTooltip="Cargar Servicio"
+                        >
+                          <i-tabler name="plus" class="icon-16"></i-tabler>
+                        </button>
+                      </div>
+                      <ul class="list-unstyled mb-0">
+                        <li
+                          *ngFor="let srv of res.servicios_extra"
+                          class="d-flex justify-content-between py-1 f-s-14 border-bottom-dashed"
+                        >
+                          <span
+                            >{{ srv.cantidad }}x {{ srv.nombre_servicio }}</span
+                          >
+                          <div class="d-flex align-items-center gap-2">
+                            <span class="f-w-600">${{ srv.total }}</span>
+                            <button
+                              mat-icon-button
+                              color="warn"
+                              class="btn-sm-icon text-error"
+                              (click)="
+                                eliminarServicioReserva(srv.id);
+                                $event.stopPropagation()
+                              "
+                            >
+                              <i-tabler name="x" class="icon-14"></i-tabler>
+                            </button>
+                          </div>
+                        </li>
+                        <li
+                          *ngIf="
+                            !res.servicios_extra ||
+                            res.servicios_extra.length === 0
+                          "
+                          class="text-muted f-s-13 py-1"
+                        >
+                          No hay servicios.
+                        </li>
+                      </ul>
+                    </div>
+
+                    <!-- Consumos -->
+                    <div>
+                      <div
+                        class="d-flex justify-content-between align-items-center mb-2"
+                      >
+                        <span class="text-muted f-s-12 f-w-600 text-uppercase"
+                          >Consumos Minibar</span
+                        >
+                        <button
+                          mat-icon-button
+                          color="accent"
+                          class="btn-sm-icon"
+                          (click)="
+                            abrirModalConsumo(res); $event.stopPropagation()
+                          "
+                          matTooltip="Cargar Consumo"
+                        >
+                          <i-tabler name="plus" class="icon-16"></i-tabler>
+                        </button>
+                      </div>
+                      <ul class="list-unstyled mb-0">
+                        <li
+                          *ngFor="let consumo of res.consumos_inventario"
+                          class="d-flex justify-content-between py-1 f-s-14 border-bottom-dashed"
+                        >
+                          <span
+                            >{{ consumo.cantidad }}x
+                            {{ consumo.producto_nombre }}</span
+                          >
+                          <div class="d-flex align-items-center gap-2">
+                            <span class="text-primary f-w-600"
+                              >${{ consumo.total }}</span
+                            >
+                            <button
+                              mat-icon-button
+                              color="warn"
+                              class="btn-sm-icon text-error"
+                              (click)="
+                                eliminarConsumo(consumo.id);
+                                $event.stopPropagation()
+                              "
+                            >
+                              <i-tabler name="x" class="icon-14"></i-tabler>
+                            </button>
+                          </div>
+                        </li>
+                        <li
+                          *ngIf="
+                            !res.consumos_inventario ||
+                            res.consumos_inventario.length === 0
+                          "
+                          class="text-muted f-s-13 py-1"
+                        >
+                          No hay consumos.
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <!-- COLUMNA 3: RESUMEN FINANCIERO -->
+                  <div class="flex-fill" style="min-width: 220px">
+                    <div
+                      style="
+                        background: #fff;
+                        border: 1px solid #e0e0e0;
+                        border-radius: 8px;
+                        padding: 16px;
+                        height: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: space-between;
+                      "
+                    >
+                      <!-- Título -->
+                      <div
+                        style="
+                          font-size: 12px;
+                          font-weight: 600;
+                          color: #6c757d;
+                          text-transform: uppercase;
+                          margin-bottom: 12px;
+                          border-bottom: 1px solid #e0e0e0;
+                          padding-bottom: 8px;
+                        "
+                      >
+                        Resumen Financiero
+                      </div>
+
+                      <!-- Desglose -->
+                      <div>
+                        <div
+                          style="
+                            display: flex;
+                            justify-content: space-between;
+                            font-size: 14px;
+                            color: #6c757d;
+                            margin-bottom: 4px;
+                          "
+                        >
+                          <span>Subtotal:</span>
+                          <span style="font-weight: 600; color: #333"
+                            >${{ res.subtotal_final }}</span
+                          >
+                        </div>
+
+                        <div
+                          *ngIf="res.descuento > 0"
+                          style="
+                            display: flex;
+                            justify-content: space-between;
+                            font-size: 14px;
+                            color: #dc3545;
+                            margin-bottom: 4px;
+                          "
+                        >
+                          <span>Descuento:</span>
+                          <span style="font-weight: 600"
+                            >-${{ res.descuento }}</span
+                          >
+                        </div>
+
+                        <div
+                          style="
+                            display: flex;
+                            justify-content: space-between;
+                            font-size: 14px;
+                            color: #6c757d;
+                            margin-bottom: 4px;
+                          "
+                        >
+                          <span>IVA:</span>
+                          <span style="font-weight: 600; color: #333"
+                            >${{ res.impuestos }}</span
+                          >
+                        </div>
+                      </div>
+
+                      <!-- Total -->
+                      <div
+                        style="
+                          display: flex;
+                          justify-content: space-between;
+                          font-size: 18px;
+                          font-weight: 700;
+                          border-top: 1px solid #333;
+                          padding-top: 12px;
+                          margin-top: 12px;
+                        "
+                      >
+                        <span>Total:</span>
+                        <span style="color: #f26d4f">${{ res.total }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr
+            mat-header-row
+            *matHeaderRowDef="[
+              'codigo',
+              'huesped',
+              'fechas',
+              'estado',
+              'total',
+              'saldo',
+              'acciones',
+            ]"
+          ></tr>
+
+          <!-- Fila de datos -->
+          <tr
+            mat-row
+            *matRowDef="
+              let row;
+              columns: [
+                'codigo',
+                'huesped',
+                'fechas',
+                'estado',
+                'total',
+                'saldo',
+                'acciones',
+              ]
+            "
+            class="element-row"
+            (click)="toggleRow(row)"
+          ></tr>
+
+          <!-- Fila expandible -->
+          <tr
+            mat-row
+            *matRowDef="let row; columns: ['expandedDetail']"
+            class="detail-row"
+          ></tr>
+        </table>
+
+        @if (reservas().length === 0) {
+          <div class="p-4 text-center text-muted">
+            No hay reservas registradas.
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

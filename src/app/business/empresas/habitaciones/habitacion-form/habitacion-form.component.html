@@ -1,0 +1,115 @@
+<h2 mat-dialog-title>{{ data.habitacion ? "Editar" : "Nueva" }} Habitación</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="d-flex flex-col gap-3 pt-2">
+    <!-- Fila: Número y Tipo -->
+    <div class="row">
+      <div class="col-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Número</mat-label>
+          <input matInput formControlName="numero" placeholder="Ej. 101" />
+        </mat-form-field>
+      </div>
+      <div class="col-6">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Tipo de Habitación</mat-label>
+          <mat-select formControlName="tipo">
+            @for (tipo of tiposHabitacion; track tipo.id) {
+              <!-- Mostramos la clave (ej. "Individual") y enviamos ese mismo texto -->
+              <mat-option [value]="tipo.clave">{{ tipo.clave }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Capacidad -->
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Capacidad Máxima (Personas)</mat-label>
+      <input matInput type="number" formControlName="capacidad_maxima" />
+    </mat-form-field>
+
+    <!-- NUEVO CAMPO: PRECIO BASE -->
+    <mat-form-field appearance="outline" class="w-100">
+      <mat-label>Precio Base por Noche ($)</mat-label>
+      <input
+        matInput
+        type="number"
+        formControlName="precio_base"
+        appOnlyNumbers
+      />
+      @if (form.get("precio_base")?.hasError("required")) {
+        <mat-error>El precio es obligatorio</mat-error>
+      }
+      @if (form.get("precio_base")?.hasError("min")) {
+        <mat-error>El precio no puede ser negativo</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Checkboxes -->
+    <div class="d-flex flex-col gap-2 mt-1 mb-2">
+      <mat-checkbox formControlName="permite_reserva_completa" color="primary">
+        Permite reserva completa
+      </mat-checkbox>
+      <mat-checkbox formControlName="permite_reserva_espacios" color="primary">
+        Permite reserva por espacios
+      </mat-checkbox>
+    </div>
+
+    <!-- SECCIÓN DE ESPACIOS (Solo si permite reserva por espacios) -->
+    @if (form.get("permite_reserva_espacios")?.value) {
+      <div class="border-t pt-3 mt-2">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="f-s-14 f-w-600 text-primary">Espacios (Camas)</span>
+          <button
+            type="button"
+            mat-stroked-button
+            color="primary"
+            (click)="agregarEspacio()"
+          >
+            <i-tabler name="plus" class="icon-16 me-1"></i-tabler> Agregar
+          </button>
+        </div>
+
+        <div formArrayName="espacios" class="d-flex flex-col gap-2">
+          @for (esp of espaciosArray.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="d-flex align-items-center gap-2">
+              <mat-form-field appearance="outline" class="w-100 mb-0">
+                <mat-label>Nombre del Espacio</mat-label>
+                <input
+                  matInput
+                  formControlName="nombre"
+                  placeholder="Ej. Cama 1"
+                />
+              </mat-form-field>
+              <button
+                type="button"
+                mat-icon-button
+                color="warn"
+                (click)="eliminarEspacio(i)"
+              >
+                <i-tabler name="trash" class="icon-18"></i-tabler>
+              </button>
+            </div>
+          } @empty {
+            <div class="text-muted f-s-12 text-center py-2">
+              No hay espacios agregados.
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="guardando">Cancelar</button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="form.invalid || guardando"
+    (click)="guardar()"
+  >
+    {{ guardando ? "Guardando..." : "Guardar" }}
+  </button>
+</mat-dialog-actions>

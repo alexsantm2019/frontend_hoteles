@@ -1,0 +1,48 @@
+<!-- sidebar.component.html -->
+@if (mobileQuery.matches) {
+  <div class="horizontal-sidebar sticky-sidebar p-y-3">
+    <div class="container text-center">
+      <!-- Primera fila: ddType !== 1 -->
+      <div class="horizontal-navbar hstack align-items-center">
+        @for (item of secondRowItems; track item) {
+          <app-horizontal-nav-item
+            [item]="item"
+            class="parentBox {{ item.ddType }}"
+            [ngClass]="{
+              pactive: item.route == parentActive ? 'pactive' : '',
+            }"
+          >
+          </app-horizontal-nav-item>
+        }
+      </div>
+
+      <!-- Segunda fila: ddType === 1 -->
+      <div class="horizontal-navbar hstack align-items-center mb-2">
+        @for (item of firstRowItems; track item) {
+          @if (isItemVisible(item)) {
+            <app-horizontal-nav-item
+              [item]="item"
+              class="parentBox {{ item.ddType }}"
+              [ngClass]="{
+                pactive: item.route == parentActive ? 'pactive' : '',
+              }"
+            >
+            </app-horizontal-nav-item>
+          }
+        }
+      </div>
+      <!-- <div class="horizontal-navbar hstack align-items-center mb-2">
+        @for (item of firstRowItems; track item) {
+          <app-horizontal-nav-item
+            [item]="item"
+            class="parentBox {{ item.ddType }}"
+            [ngClass]="{
+              pactive: item.route == parentActive ? 'pactive' : '',
+            }"
+          >
+          </app-horizontal-nav-item>
+        }
+      </div> -->
+    </div>
+  </div>
+}
